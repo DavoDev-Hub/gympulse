@@ -10,7 +10,8 @@ data class WorkoutEntity(
     val date: Long = System.currentTimeMillis(),
     val startTime: Long = System.currentTimeMillis(),
     val endTime: Long? = null,
-    val notes: String = ""
+    val notes: String = "",
+    val bodyWeight: Float? = null
 )
 
 @Entity(tableName = "exercises")
@@ -30,7 +31,6 @@ data class ExerciseSetEntity(
     val reps: Int? = null,
     val weight: Float? = null
 )
-
 
 @Entity(tableName = "routines")
 data class RoutineEntity(

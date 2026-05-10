@@ -1,5 +1,5 @@
 package com.example.gympulse.ui.registro
-
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -188,39 +188,43 @@ fun WorkoutCard(
                         fontSize = 13.sp
                     )
                 } else {
-                    Text(
-                        text = ejerciciosUnicos.joinToString(", "),
-                        color = TextSecondary,
-                        fontSize = 13.sp
-                    )
+                    ejerciciosUnicos.forEach { ejercicio ->
+                        Text(
+                            text = ejercicio,
+                            color = TextSecondary,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-private fun mesActual(): String {
-    val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+// --- Helpers de fecha ---
+
+fun mesActual(): String {
+    val sdf = SimpleDateFormat("MMMM", Locale("es"))
     return sdf.format(Date()).replaceFirstChar { it.uppercase() }
 }
 
-private fun duracionMinutos(startTime: Long, endTime: Long?): Long? {
-    if (endTime == null) return null
-    val diff = endTime - startTime
-    return diff / (1000 * 60)
+fun diaSemana(timestamp: Long): String {
+    val sdf = SimpleDateFormat("EEE", Locale("es"))
+    return sdf.format(Date(timestamp)).uppercase()
 }
 
-private fun diaSemana(date: Long): String {
-    val sdf = SimpleDateFormat("EEE", Locale.getDefault())
-    return sdf.format(Date(date)).uppercase()
+fun numeroDia(timestamp: Long): String {
+    val sdf = SimpleDateFormat("d", Locale("es"))
+    return sdf.format(Date(timestamp))
 }
 
-private fun numeroDia(date: Long): String {
-    val sdf = SimpleDateFormat("dd", Locale.getDefault())
-    return sdf.format(Date(date))
+fun mes(timestamp: Long): String {
+    val sdf = SimpleDateFormat("MMM", Locale("es"))
+    return sdf.format(Date(timestamp)).uppercase()
 }
 
-private fun mes(date: Long): String {
-    val sdf = SimpleDateFormat("MMM", Locale.getDefault())
-    return sdf.format(Date(date)).uppercase()
+fun duracionMinutos(start: Long, end: Long?): Long? {
+    if (end == null) return null
+    val diff = end - start
+    return diff / 60000
 }

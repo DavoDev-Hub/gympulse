@@ -3,6 +3,7 @@ package com.example.gympulse.data
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
+
 @Dao
 interface WorkoutDao {
     @Query("SELECT * FROM workouts ORDER BY date DESC")
@@ -22,7 +23,8 @@ interface WorkoutDao {
 interface ExerciseDao {
     @Query("SELECT * FROM exercises ORDER BY category, name")
     fun getAll(): Flow<List<ExerciseEntity>>
-
+    @Query("SELECT COUNT(*) FROM exercises")
+    suspend fun getCount(): Int
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(exercises: List<ExerciseEntity>)
 }
@@ -44,6 +46,7 @@ interface ExerciseSetDao {
     @Query("DELETE FROM exercise_sets WHERE workoutId = :workoutId")
     suspend fun deleteAllFromWorkout(workoutId: Long)
 }
+
 
 @Dao
 interface RoutineDao {

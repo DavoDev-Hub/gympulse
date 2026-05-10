@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
         RoutineEntity::class,           // ← nuevo
         RoutineExerciseEntity::class    // ← nuevo
     ],
-    version = 2,                        // ← incrementar versión
+    version = 3,                        // ← incrementar versión
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -32,18 +32,24 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(context, AppDatabase::class.java, "gympulse.db")
-                    .fallbackToDestructiveMigration() // ← agrega esto por el cambio de versión
-                    .addCallback(object : Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            CoroutineScope(Dispatchers.IO).launch {
-                                INSTANCE?.exerciseDao()?.insertAll(defaultExercises)
-                            }
-                        }
-                    })
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "gympulse.db"
+                )
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { INSTANCE = it }
+
+                // Pre-poblar DESPUÉS de asignar INSTANCE
+                CoroutineScope(Dispatchers.IO).launch {
+                    val count = instance.exerciseDao().getCount()
+                    if (count == 0) {
+                        instance.exerciseDao().insertAll(defaultExercises)
+                    }
+                }
+
+                instance
             }
         }
 

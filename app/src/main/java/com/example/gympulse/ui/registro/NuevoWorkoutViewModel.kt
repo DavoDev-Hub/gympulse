@@ -1,6 +1,8 @@
 package com.example.gympulse.ui.registro
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,6 +19,7 @@ class NuevoWorkoutViewModel(private val repository: WorkoutRepository) : ViewMod
     var nombre by mutableStateOf("")
     var notas  by mutableStateOf("")
     val startTime = System.currentTimeMillis()
+    var pesocorporal by mutableStateOf("")  // ← agrega esto
 
     // Ejercicios agregados al workout actual
     // Mapa: exerciseName -> lista de series
@@ -73,7 +76,8 @@ class NuevoWorkoutViewModel(private val repository: WorkoutRepository) : ViewMod
                     notes     = notas,
                     startTime = startTime,
                     endTime   = System.currentTimeMillis(),
-                    date      = startTime
+                    date      = startTime,
+                    bodyWeight  = pesocorporal.toFloatOrNull()
                 )
             )
             val entities = _sets.value.mapIndexed { index, set ->

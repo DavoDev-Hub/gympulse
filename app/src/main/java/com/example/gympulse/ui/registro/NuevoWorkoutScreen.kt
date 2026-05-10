@@ -83,8 +83,8 @@ fun NuevoWorkoutScreen(
                         colors = outlinedTextFieldColors()
                     )
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
+                        value = viewModel.pesocorporal,
+                        onValueChange = { viewModel.pesocorporal = it },
                         placeholder = { Text("Mi Peso...", color = TextSecondary) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,

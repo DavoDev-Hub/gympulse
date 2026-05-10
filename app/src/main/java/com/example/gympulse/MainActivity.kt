@@ -1,5 +1,4 @@
 package com.example.gympulse
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -65,7 +64,7 @@ fun MainScaffold() {
     ) { innerPadding ->
         NavGraph(
             navController = navController,
-            paddingValues = innerPadding
+            modifier = Modifier.padding(innerPadding)  // ← agrega esto
         )
     }
 }

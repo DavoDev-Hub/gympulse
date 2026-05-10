@@ -1,8 +1,6 @@
 package com.example.gympulse.ui.navigation
-
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -16,25 +14,24 @@ import com.example.gympulse.ui.rutinas.RutinasScreen
 
 sealed class Screen(val route: String) {
     object Registro      : Screen("registro")
-    object NuevoWorkout  : Screen("nuevo_workout")
+    object NuevoWorkout : Screen("nuevo_workout?routineId={routineId}")
     object Rutinas       : Screen("rutinas")
     object Estadisticas  : Screen("estadisticas")
+    companion object {
+        fun nuevoWorkout(routineId: Long? = null): String {
+            return if (routineId != null) "nuevo_workout?routineId=$routineId"
+            else "nuevo_workout?routineId=-1"
+        }
 }
 
 @Composable
-fun NavGraph(
-    navController: NavHostController,
-    paddingValues: PaddingValues = PaddingValues()
+fun NavGraph(navController: NavHostController,modifier: Modifier = Modifier          // ← agrega esto
 ) {
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val repository = WorkoutRepository(db)
 
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Registro.route,
-        modifier = androidx.compose.ui.Modifier.padding(paddingValues)
-    ) {
+    NavHost(navController = navController, startDestination = Screen.Registro.route, modifier = modifier  ) {
         composable(Screen.Registro.route) {
             RegistroScreen(
                 repository = repository,
@@ -50,9 +47,9 @@ fun NavGraph(
         composable(Screen.Rutinas.route) {
             RutinasScreen(repository = repository)
         }
-
         composable(Screen.Estadisticas.route) {
-            EstadisticasScreen()
+            EstadisticasScreen(repository = repository)
         }
     }
+}
 }
