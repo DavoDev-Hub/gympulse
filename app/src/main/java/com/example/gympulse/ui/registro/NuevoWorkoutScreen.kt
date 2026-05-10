@@ -1,6 +1,5 @@
 package com.example.gympulse.ui.registro
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,10 +27,11 @@ import com.example.gympulse.ui.theme.*
 @Composable
 fun NuevoWorkoutScreen(
     repository: WorkoutRepository,
+    routineId: Long? = null,               // ← agregado
     onTerminar: () -> Unit
 ) {
     val viewModel: NuevoWorkoutViewModel = viewModel(
-        factory = NuevoWorkoutViewModel.Factory(repository)
+        factory = NuevoWorkoutViewModel.Factory(repository, routineId)  // ← agregado routineId
     )
 
     val sets      by viewModel.sets.collectAsStateWithLifecycle()
@@ -39,7 +39,6 @@ fun NuevoWorkoutScreen(
 
     var showExerciseSelector by remember { mutableStateOf(false) }
 
-    // Agrupar series por ejercicio para mostrarlas
     val groupedSets = sets.groupBy { it.exerciseName }
 
     Scaffold(
@@ -71,7 +70,6 @@ fun NuevoWorkoutScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            // --- Formulario superior ---
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
@@ -88,6 +86,7 @@ fun NuevoWorkoutScreen(
                         placeholder = { Text("Mi Peso...", color = TextSecondary) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = outlinedTextFieldColors()
                     )
                 }
@@ -106,7 +105,6 @@ fun NuevoWorkoutScreen(
 
             item { HorizontalDivider(color = CardDark, thickness = 1.dp) }
 
-            // --- Series agrupadas por ejercicio ---
             groupedSets.forEach { (exerciseName, seriesDelEjercicio) ->
                 item {
                     Text(
@@ -120,11 +118,11 @@ fun NuevoWorkoutScreen(
 
                 items(seriesDelEjercicio) { set ->
                     SerieRow(
-                        set       = set,
-                        numero    = seriesDelEjercicio.indexOf(set) + 1,
-                        onReps    = { viewModel.updateSet(set.id, reps = it) },
-                        onWeight  = { viewModel.updateSet(set.id, weight = it) },
-                        onRemove  = { viewModel.removeSet(set.id) }
+                        set      = set,
+                        numero   = seriesDelEjercicio.indexOf(set) + 1,
+                        onReps   = { viewModel.updateSet(set.id, reps = it) },
+                        onWeight = { viewModel.updateSet(set.id, weight = it) },
+                        onRemove = { viewModel.removeSet(set.id) }
                     )
                 }
 
@@ -141,7 +139,6 @@ fun NuevoWorkoutScreen(
                 }
             }
 
-            // --- Botón añadir ejercicio ---
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
@@ -158,7 +155,6 @@ fun NuevoWorkoutScreen(
                 }
             }
 
-            // --- Botón guardar ---
             item {
                 Button(
                     onClick = { viewModel.guardarWorkout(onTerminar) },
@@ -180,7 +176,6 @@ fun NuevoWorkoutScreen(
         }
     }
 
-    // --- Dialog selector de ejercicios ---
     if (showExerciseSelector) {
         ExerciseSelectorDialog(
             exercises = exercises,
@@ -206,14 +201,12 @@ fun SerieRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Número de serie
         Text(
             text = "$numero",
             color = TextSecondary,
             fontSize = 14.sp,
             modifier = Modifier.width(20.dp)
         )
-
         OutlinedTextField(
             value = set.reps,
             onValueChange = onReps,
@@ -223,7 +216,6 @@ fun SerieRow(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = outlinedTextFieldColors()
         )
-
         OutlinedTextField(
             value = set.weight,
             onValueChange = onWeight,
@@ -233,7 +225,6 @@ fun SerieRow(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             colors = outlinedTextFieldColors()
         )
-
         IconButton(onClick = onRemove, modifier = Modifier.size(32.dp)) {
             Icon(
                 Icons.Default.Close,
@@ -263,8 +254,6 @@ fun ExerciseSelectorDialog(
             colors = CardDefaults.cardColors(containerColor = SurfaceDark)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-
-                // Header
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -293,7 +282,6 @@ fun ExerciseSelectorDialog(
 
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     if (categoriaSeleccionada == null) {
-                        // Mostrar categorías
                         items(categorias) { categoria ->
                             Row(
                                 modifier = Modifier
@@ -313,7 +301,6 @@ fun ExerciseSelectorDialog(
                             HorizontalDivider(color = CardDark, thickness = 0.5.dp)
                         }
                     } else {
-                        // Mostrar ejercicios de la categoría
                         val ejerciciosFiltrados = exercises.filter {
                             it.category == categoriaSeleccionada
                         }

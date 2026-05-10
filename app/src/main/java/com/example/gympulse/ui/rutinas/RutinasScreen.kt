@@ -17,19 +17,20 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.gympulse.data.ExerciseEntity
-import com.example.gympulse.data.RoutineEntity
 import com.example.gympulse.data.WorkoutRepository
 import com.example.gympulse.ui.registro.ExerciseSelectorDialog
 import com.example.gympulse.ui.theme.*
 
 @Composable
-fun RutinasScreen(repository: WorkoutRepository) {
+fun RutinasScreen(
+    repository: WorkoutRepository,
+    onIniciarRutina: (Long) -> Unit        // ← agregado
+) {
     val viewModel: RutinasViewModel = viewModel(
         factory = RutinasViewModel.Factory(repository)
     )
-    val routines     by viewModel.routines.collectAsStateWithLifecycle()
-    val exercises    by viewModel.allExercises.collectAsStateWithLifecycle()
+    val routines      by viewModel.routines.collectAsStateWithLifecycle()
+    val exercises     by viewModel.allExercises.collectAsStateWithLifecycle()
     val seleccionados by viewModel.ejerciciosSeleccionados.collectAsStateWithLifecycle()
 
     var showExerciseSelector by remember { mutableStateOf(false) }
@@ -63,7 +64,8 @@ fun RutinasScreen(repository: WorkoutRepository) {
                     items(routines) { item ->
                         RutinaCard(
                             routineWithExercises = item,
-                            onDelete = { viewModel.deleteRoutine(item.routine) }
+                            onDelete   = { viewModel.deleteRoutine(item.routine) },
+                            onIniciar  = { onIniciarRutina(item.routine.id) }  // ← agregado
                         )
                     }
                     item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -71,7 +73,6 @@ fun RutinasScreen(repository: WorkoutRepository) {
             }
         }
 
-        // FAB
         FloatingActionButton(
             onClick = { viewModel.showCrearDialog = true },
             containerColor = CyanPrimary,
@@ -84,20 +85,18 @@ fun RutinasScreen(repository: WorkoutRepository) {
         }
     }
 
-    // Dialog crear rutina
     if (viewModel.showCrearDialog) {
         CrearRutinaDialog(
-            nombre        = viewModel.nombreRutina,
-            onNombreChange = { viewModel.nombreRutina = it },
-            seleccionados = seleccionados.map { it.exerciseName },
-            onAddEjercicio = { showExerciseSelector = true },
+            nombre            = viewModel.nombreRutina,
+            onNombreChange    = { viewModel.nombreRutina = it },
+            seleccionados     = seleccionados.map { it.exerciseName },
+            onAddEjercicio    = { showExerciseSelector = true },
             onRemoveEjercicio = { viewModel.quitarEjercicioDeNuevaRutina(it) },
-            onGuardar     = { viewModel.guardarRutina {} },
-            onDismiss     = { viewModel.showCrearDialog = false }
+            onGuardar         = { viewModel.guardarRutina {} },
+            onDismiss         = { viewModel.showCrearDialog = false }
         )
     }
 
-    // Selector de ejercicios
     if (showExerciseSelector) {
         ExerciseSelectorDialog(
             exercises = exercises,
@@ -113,7 +112,8 @@ fun RutinasScreen(repository: WorkoutRepository) {
 @Composable
 fun RutinaCard(
     routineWithExercises: RutinasViewModel.RoutineWithExercises,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onIniciar: () -> Unit                  // ← agregado
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -121,6 +121,7 @@ fun RutinaCard(
         colors = CardDefaults.cardColors(containerColor = CardDark)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -152,6 +153,20 @@ fun RutinaCard(
                 routineWithExercises.exercises.forEach { exercise ->
                     Text("• ${exercise.exerciseName}", color = TextSecondary, fontSize = 13.sp)
                 }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ← botón Iniciar agregado
+            Button(
+                onClick = onIniciar,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+            ) {
+                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Iniciar", fontWeight = FontWeight.SemiBold)
             }
         }
     }
