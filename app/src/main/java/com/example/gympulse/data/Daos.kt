@@ -9,6 +9,9 @@ interface WorkoutDao {
     @Query("SELECT * FROM workouts ORDER BY date DESC")
     fun getAll(): Flow<List<WorkoutEntity>>
 
+    @Query("SELECT * FROM workouts ORDER BY date DESC")
+    suspend fun getAllOnce(): List<WorkoutEntity>
+
     @Insert
     suspend fun insert(workout: WorkoutEntity): Long
 
@@ -33,6 +36,9 @@ interface ExerciseDao {
 interface ExerciseSetDao {
     @Query("SELECT * FROM exercise_sets WHERE workoutId = :workoutId")
     fun getSetsForWorkout(workoutId: Long): Flow<List<ExerciseSetEntity>>
+
+    @Query("SELECT * FROM exercise_sets WHERE workoutId = :workoutId")
+    suspend fun getSetsForWorkoutOnce(workoutId: Long): List<ExerciseSetEntity>
 
     @Insert
     suspend fun insert(set: ExerciseSetEntity)

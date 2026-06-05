@@ -49,8 +49,8 @@ fun CrearRutinaScreen(
                 },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = CyanPrimary)
-                        Text("Atrás", color = CyanPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("Atrás", color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -71,7 +71,7 @@ fun CrearRutinaScreen(
                 OutlinedTextField(
                     value = viewModel.nombre,
                     onValueChange = { viewModel.nombre = it },
-                    placeholder = { Text("Nombre de la rutina", color = TextSecondary) },
+                    placeholder = { Text("Nombre de la rutina", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = outlinedTextFieldColors()
@@ -82,14 +82,14 @@ fun CrearRutinaScreen(
                 OutlinedTextField(
                     value = viewModel.notas,
                     onValueChange = { viewModel.notas = it },
-                    placeholder = { Text("Notas (opcional)", color = TextSecondary) },
+                    placeholder = { Text("Notas (opcional)", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                     colors = outlinedTextFieldColors()
                 )
             }
 
-            item { HorizontalDivider(color = CardDark, thickness = 1.dp) }
+            item { HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp) }
 
             itemsIndexed(ejercicios) { _, ejercicio ->
                 EjercicioConSets(
@@ -111,7 +111,7 @@ fun CrearRutinaScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -128,8 +128,8 @@ fun CrearRutinaScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (viewModel.isValid()) CyanPrimary else CardDark,
-                        disabledContainerColor = CardDark
+                        containerColor = if (viewModel.isValid()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
@@ -165,7 +165,7 @@ private fun EjercicioConSets(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -177,13 +177,13 @@ private fun EjercicioConSets(
                     text = ejercicio.exerciseName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
-                    color = CyanPrimary
+                    color = MaterialTheme.colorScheme.primary
                 )
                 IconButton(onClick = onRemoveEjercicio, modifier = Modifier.size(24.dp)) {
                     Icon(
                         Icons.Default.Close,
                         contentDescription = "Quitar ejercicio",
-                        tint = TextSecondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -204,8 +204,8 @@ private fun EjercicioConSets(
             }
 
             TextButton(onClick = onAddSet) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = CyanPrimary)
-                Text("Agregar serie", color = CyanPrimary)
+                Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text("Agregar serie", color = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -227,7 +227,7 @@ private fun SerieRowEditable(
         OutlinedTextField(
             value = set.weight,
             onValueChange = { onUpdate(it, null, null) },
-            placeholder = { Text("Peso", color = TextSecondary, fontSize = 12.sp) },
+            placeholder = { Text("Peso", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) },
             modifier = Modifier.weight(1f),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -240,11 +240,11 @@ private fun SerieRowEditable(
         var expanded by remember { mutableStateOf(false) }
         Box {
             TextButton(onClick = { expanded = true }) {
-                Text(set.weightUnit, color = CyanPrimary, fontSize = 13.sp)
+                Text(set.weightUnit, color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                 Icon(
                     Icons.Default.ArrowDropDown,
                     contentDescription = null,
-                    tint = CyanPrimary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -274,7 +274,7 @@ private fun SerieRowEditable(
         OutlinedTextField(
             value = set.reps,
             onValueChange = { onUpdate(null, it, null) },
-            placeholder = { Text("Reps", color = TextSecondary, fontSize = 12.sp) },
+            placeholder = { Text("Reps", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) },
             modifier = Modifier.weight(1f),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -287,7 +287,7 @@ private fun SerieRowEditable(
                 Icon(
                     Icons.Default.MoreVert,
                     contentDescription = "Opciones",
-                    tint = TextSecondary,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }

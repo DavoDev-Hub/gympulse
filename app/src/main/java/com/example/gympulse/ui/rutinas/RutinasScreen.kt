@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gympulse.data.WorkoutRepository
+import com.example.gympulse.ui.components.RestDayPickerDialog
 import com.example.gympulse.ui.theme.*
 
 @Composable
@@ -31,6 +32,7 @@ fun RutinasScreen(
         factory = RutinasViewModel.Factory(repository)
     )
     val routines by viewModel.routines.collectAsStateWithLifecycle()
+    var showDayPicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadRoutines()
@@ -43,21 +45,35 @@ fun RutinasScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "Rutinas",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 20.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Rutinas",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { showDayPicker = true }) {
+                    Icon(
+                        Icons.Default.CalendarMonth,
+                        contentDescription = "Días de descanso",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
 
-            if (routines.isEmpty()) {
+        if (routines.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Sin rutinas aún", color = TextSecondary, fontSize = 16.sp)
-                        Text("Pulsa + para crear una", color = TextSecondary, fontSize = 14.sp)
+                        Text("Sin rutinas aún", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+                        Text("Pulsa + para crear una", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                     }
                 }
             } else {
@@ -78,7 +94,7 @@ fun RutinasScreen(
 
         FloatingActionButton(
             onClick = onCreateRutina,
-            containerColor = CyanPrimary,
+            containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -86,6 +102,10 @@ fun RutinasScreen(
         ) {
             Icon(Icons.Default.Add, contentDescription = "Nueva rutina")
         }
+    }
+
+    if (showDayPicker) {
+        RestDayPickerDialog(onDismiss = { showDayPicker = false })
     }
 }
 
@@ -106,7 +126,7 @@ fun RutinaCardExpandible(
             .fillMaxWidth()
             .clickable { expanded = !expanded },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardDark)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
@@ -119,14 +139,14 @@ fun RutinaCardExpandible(
                     text = routine.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                         contentDescription = null,
-                        tint = TextSecondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -138,7 +158,7 @@ fun RutinaCardExpandible(
                         val seriesCount = ex.sets.size
                         Text(
                             text = "• ${ex.exerciseName} ($seriesCount serie${if (seriesCount != 1) "s" else ""})",
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
                             modifier = Modifier.padding(vertical = 2.dp)
                         )
@@ -149,7 +169,7 @@ fun RutinaCardExpandible(
                     if (routine.notes.isNotBlank()) {
                         Text(
                             text = "📝 ${routine.notes}",
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -163,7 +183,7 @@ fun RutinaCardExpandible(
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = "Editar",
-                                tint = CyanPrimary,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -171,7 +191,7 @@ fun RutinaCardExpandible(
                             Icon(
                                 Icons.Default.ContentCopy,
                                 contentDescription = "Duplicar",
-                                tint = TextSecondary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -179,7 +199,7 @@ fun RutinaCardExpandible(
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = "Eliminar",
-                                tint = TextSecondary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -191,7 +211,7 @@ fun RutinaCardExpandible(
                         onClick = onIniciar,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = null)
                         Spacer(modifier = Modifier.width(6.dp))

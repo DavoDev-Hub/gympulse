@@ -87,13 +87,13 @@ fun IniciarRutinaScreen(
                 title = { Text(nombreRutina, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = CyanPrimary)
-                        Text("Atrás", color = CyanPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("Atrás", color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showTimer = true }) {
-                        Icon(Icons.Default.Timer, contentDescription = "Temporizador", tint = CyanPrimary)
+                        Icon(Icons.Default.Timer, contentDescription = "Temporizador", tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -113,14 +113,14 @@ fun IniciarRutinaScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = ejercicio.exerciseName,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = CyanPrimary
+                            color = MaterialTheme.colorScheme.primary
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -138,7 +138,7 @@ fun IniciarRutinaScreen(
                                     }
                                 }
                             )
-                            Text("a", color = TextSecondary, fontSize = 13.sp)
+                            Text("a", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                             TimeField(
                                 label = "Final",
                                 value = ejercicio.horaFinal,
@@ -166,7 +166,7 @@ fun IniciarRutinaScreen(
                                 Icon(
                                     Icons.Default.Info,
                                     contentDescription = "Información",
-                                    tint = CyanPrimary,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -177,7 +177,7 @@ fun IniciarRutinaScreen(
                             if (diff >= 0) {
                                 Text(
                                     text = "Duración: $diff min",
-                                    color = TextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp
                                 )
                             }
@@ -202,13 +202,13 @@ fun IniciarRutinaScreen(
                                         }
                                     },
                                     colors = CheckboxDefaults.colors(
-                                        checkedColor = CyanPrimary,
-                                        uncheckedColor = TextSecondary
+                                        checkedColor = MaterialTheme.colorScheme.primary,
+                                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 )
                                 Text(
                                     text = "Serie ${setIdx + 1}: ${set.weight} ${set.weightUnit} x ${set.reps} reps",
-                                    color = TextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(start = 4.dp)
                                 )
@@ -239,8 +239,8 @@ fun IniciarRutinaScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CyanPrimary,
-                        disabledContainerColor = CardDark
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Icon(Icons.Default.Stop, contentDescription = null)
@@ -274,15 +274,15 @@ private fun TimeField(
         OutlinedTextField(
             value = value,
             onValueChange = {},
-            placeholder = { Text(label, color = TextSecondary, fontSize = 12.sp) },
+            placeholder = { Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) },
             modifier = Modifier.fillMaxWidth(),
             readOnly = true,
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = CyanPrimary,
-                unfocusedBorderColor = CardDark,
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
             ),
             textStyle = LocalTextStyle.current.copy(fontSize = 13.sp, textAlign = TextAlign.Center)
         )
@@ -324,7 +324,7 @@ private fun TimePickerDialog(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -340,13 +340,13 @@ private fun TimePickerDialog(
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancelar", color = TextSecondary)
+                        Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Button(
                         onClick = {
                             onConfirm(state.hour, state.minute)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Text("Aceptar")
                     }
@@ -362,7 +362,7 @@ private fun InfoDialog(onDismiss: () -> Unit) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -380,13 +380,13 @@ private fun InfoDialog(onDismiss: () -> Unit) {
                             "total de tu entrenamiento.\n\n" +
                             "Toca cada campo para abrir el selector de hora. " +
                             "La hora final no puede ser menor a la hora de inicio.",
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text("Entendido")
                 }
@@ -442,25 +442,23 @@ private fun guardarRutina(
                 date = startTime
             )
         )
-        var idx = 0
         for (ex in ejercicios) {
             val tiempo = if (ex.horaInicio.isNotBlank() && ex.horaFinal.isNotBlank()) {
                 maxOf(minutosEntre(ex.horaInicio, ex.horaFinal), 0)
             } else null
-            for (set in ex.sets) {
+            ex.sets.forEachIndexed { setIdx, set ->
                 repository.insertSet(
                     ExerciseSetEntity(
                         workoutId = workoutId,
                         exerciseId = 0L,
                         exerciseName = ex.exerciseName,
-                        setNumber = idx + 1,
+                        setNumber = setIdx + 1,
                         reps = set.reps.toIntOrNull(),
                         weight = set.weight.toFloatOrNull(),
                         completed = set.completado,
                         timeTakenMinutes = tiempo
                     )
                 )
-                idx++
             }
         }
         onDone()
@@ -487,7 +485,7 @@ fun TimerDialog(onDismiss: () -> Unit) {
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier
@@ -504,7 +502,7 @@ fun TimerDialog(onDismiss: () -> Unit) {
 
                 Text(
                     text = "Gestiona tus descansos entre series",
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -513,14 +511,14 @@ fun TimerDialog(onDismiss: () -> Unit) {
                     text = formatTimer(seconds),
                     fontSize = 56.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CyanPrimary
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(
                         onClick = { isRunning = !isRunning },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isRunning) MaterialTheme.colorScheme.error else CyanPrimary
+                            containerColor = if (isRunning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(16.dp)
@@ -546,7 +544,7 @@ fun TimerDialog(onDismiss: () -> Unit) {
                 }
 
                 TextButton(onClick = onDismiss) {
-                    Text("Cerrar", color = CyanPrimary)
+                    Text("Cerrar", color = MaterialTheme.colorScheme.primary)
                 }
             }
         }

@@ -3,7 +3,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Colores principales
 val CyanPrimary    = Color(0xFF00BCD4)
 val CyanLight      = Color(0xFF4DD0E1)
 val BackgroundDark = Color(0xFF121212)
@@ -20,11 +19,14 @@ private val DarkColorScheme = darkColorScheme(
     surface        = SurfaceDark,
     onSurface      = TextPrimary,
     surfaceVariant = CardDark,
+    onSurfaceVariant = TextSecondary,
     secondary      = CyanLight,
 )
 
 @Composable
-fun GymPulseTheme(content: @Composable () -> Unit) {
+fun GymPulseTheme(
+    content: @Composable () -> Unit
+) {
     MaterialTheme(
         colorScheme = DarkColorScheme,
         content = content

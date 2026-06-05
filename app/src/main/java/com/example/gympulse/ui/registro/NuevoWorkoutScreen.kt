@@ -50,9 +50,9 @@ fun NuevoWorkoutScreen(
                         Icon(
                             Icons.Default.KeyboardArrowDown,
                             contentDescription = null,
-                            tint = CyanPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
-                        Text("Terminar", color = CyanPrimary)
+                        Text("Terminar", color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -75,7 +75,7 @@ fun NuevoWorkoutScreen(
                     OutlinedTextField(
                         value = viewModel.nombre,
                         onValueChange = { viewModel.nombre = it },
-                        placeholder = { Text("Nombre", color = TextSecondary) },
+                        placeholder = { Text("Nombre", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         colors = outlinedTextFieldColors()
@@ -83,7 +83,7 @@ fun NuevoWorkoutScreen(
                     OutlinedTextField(
                         value = viewModel.pesocorporal,
                         onValueChange = { viewModel.pesocorporal = it },
-                        placeholder = { Text("Mi Peso...", color = TextSecondary) },
+                        placeholder = { Text("Mi Peso...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -96,14 +96,14 @@ fun NuevoWorkoutScreen(
                 OutlinedTextField(
                     value = viewModel.notas,
                     onValueChange = { viewModel.notas = it },
-                    placeholder = { Text("Notas", color = TextSecondary) },
+                    placeholder = { Text("Notas", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                     colors = outlinedTextFieldColors()
                 )
             }
 
-            item { HorizontalDivider(color = CardDark, thickness = 1.dp) }
+            item { HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp) }
 
             groupedSets.forEach { (exerciseName, seriesDelEjercicio) ->
                 item {
@@ -111,7 +111,7 @@ fun NuevoWorkoutScreen(
                         text = exerciseName,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
-                        color = CyanPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -133,8 +133,8 @@ fun NuevoWorkoutScreen(
                             viewModel.addSet(exerciseName, cat)
                         }
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = CyanPrimary)
-                        Text("Agregar serie", color = CyanPrimary)
+                        Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("Agregar serie", color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -147,7 +147,7 @@ fun NuevoWorkoutScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -203,14 +203,14 @@ fun SerieRow(
     ) {
         Text(
             text = "$numero",
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             modifier = Modifier.width(20.dp)
         )
         OutlinedTextField(
             value = set.reps,
             onValueChange = onReps,
-            placeholder = { Text("Reps", color = TextSecondary, fontSize = 12.sp) },
+            placeholder = { Text("Reps", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) },
             modifier = Modifier.weight(1f),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -219,7 +219,7 @@ fun SerieRow(
         OutlinedTextField(
             value = set.weight,
             onValueChange = onWeight,
-            placeholder = { Text("Kg", color = TextSecondary, fontSize = 12.sp) },
+            placeholder = { Text("Kg", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) },
             modifier = Modifier.weight(1f),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -229,7 +229,7 @@ fun SerieRow(
             Icon(
                 Icons.Default.Close,
                 contentDescription = "Eliminar serie",
-                tint = TextSecondary,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -251,7 +251,7 @@ fun ExerciseSelectorDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.8f),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
@@ -268,7 +268,7 @@ fun ExerciseSelectorDialog(
                             if (categoriaSeleccionada != null) Icons.Default.ArrowBack
                             else Icons.Default.Close,
                             contentDescription = null,
-                            tint = CyanPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     Text(
@@ -278,7 +278,7 @@ fun ExerciseSelectorDialog(
                     )
                 }
 
-                HorizontalDivider(color = CardDark)
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     if (categoriaSeleccionada == null) {
@@ -295,10 +295,10 @@ fun ExerciseSelectorDialog(
                                 Icon(
                                     Icons.Default.ChevronRight,
                                     contentDescription = null,
-                                    tint = TextSecondary
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            HorizontalDivider(color = CardDark, thickness = 0.5.dp)
+                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 0.5.dp)
                         }
                     } else {
                         val ejerciciosFiltrados = exercises.filter {
@@ -313,7 +313,7 @@ fun ExerciseSelectorDialog(
                             ) {
                                 Text(text = exercise.name, fontSize = 16.sp)
                             }
-                            HorizontalDivider(color = CardDark, thickness = 0.5.dp)
+                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 0.5.dp)
                         }
                     }
                 }
@@ -324,9 +324,9 @@ fun ExerciseSelectorDialog(
 
 @Composable
 fun outlinedTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor   = CyanPrimary,
-    unfocusedBorderColor = CardDark,
-    focusedTextColor     = TextPrimary,
-    unfocusedTextColor   = TextPrimary,
-    cursorColor          = CyanPrimary
+    focusedBorderColor   = MaterialTheme.colorScheme.primary,
+    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+    focusedTextColor     = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor   = MaterialTheme.colorScheme.onSurface,
+    cursorColor          = MaterialTheme.colorScheme.primary
 )

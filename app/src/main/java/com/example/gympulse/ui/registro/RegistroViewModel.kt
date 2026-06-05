@@ -11,6 +11,7 @@ import com.example.gympulse.data.WorkoutRepository
 import com.example.gympulse.ui.estadisticas.Filtros
 import com.example.gympulse.ui.estadisticas.extraerAño
 import com.example.gympulse.ui.estadisticas.extraerMes
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -31,6 +32,7 @@ class RegistroViewModel(private val repository: WorkoutRepository) : ViewModel()
     val yearsAvailable: StateFlow<List<Int>> = _yearsAvailable
 
     private var allWorkouts: List<WorkoutEntity> = emptyList()
+    private var filtrosJob: Job? = null
 
     init {
         val now = Calendar.getInstance()
@@ -38,16 +40,18 @@ class RegistroViewModel(private val repository: WorkoutRepository) : ViewModel()
         loadWorkouts()
     }
 
+    fun refresh() {
+        loadWorkouts()
+    }
+
     private fun loadWorkouts() {
         viewModelScope.launch {
-            repository.getAllWorkouts().collect { workouts ->
-                allWorkouts = workouts
-                val years = workouts.map { extraerAño(it.date) }.toSet()
-                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                val minYear = minOf(years.minOrNull() ?: currentYear, currentYear)
-                _yearsAvailable.value = (minYear..currentYear).toList().reversed()
-                aplicarFiltros()
-            }
+            allWorkouts = repository.getAllWorkoutsOnce()
+            val years = allWorkouts.map { extraerAño(it.date) }.toSet()
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val minYear = minOf(years.minOrNull() ?: currentYear, currentYear)
+            _yearsAvailable.value = (minYear..currentYear).toList().reversed()
+            aplicarFiltros()
         }
     }
 
@@ -62,7 +66,8 @@ class RegistroViewModel(private val repository: WorkoutRepository) : ViewModel()
     }
 
     private fun aplicarFiltros() {
-        viewModelScope.launch {
+        filtrosJob?.cancel()
+        filtrosJob = viewModelScope.launch {
             var filtered = allWorkouts
             val a = filtros.año
             val m = filtros.mes
@@ -70,10 +75,10 @@ class RegistroViewModel(private val repository: WorkoutRepository) : ViewModel()
             if (m != null) filtered = filtered.filter { extraerMes(it.date) == m }
 
             val result = filtered.map { workout ->
-                val sets = repository.getSetsForWorkout(workout.id).first()
+                val sets = repository.getSetsForWorkoutOnce(workout.id)
                 WorkoutWithSets(workout, sets)
             }
-            _workoutsWithSets.value = result
+            _workoutsWithSets.value = result.sortedByDescending { it.workout.date }
         }
     }
 
@@ -81,6 +86,7 @@ class RegistroViewModel(private val repository: WorkoutRepository) : ViewModel()
         viewModelScope.launch {
             repository.deleteAllSetsFromWorkout(workout.id)
             repository.deleteWorkout(workout)
+            refresh()
         }
     }
 

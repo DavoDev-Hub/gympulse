@@ -5,8 +5,10 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,18 +31,23 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gympulse.data.WorkoutRepository
+import com.example.gympulse.ui.components.RestDayPickerDialog
 import com.example.gympulse.ui.theme.*
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EstadisticasScreen(repository: WorkoutRepository) {
+    val app = LocalContext.current.applicationContext as Application
     val viewModel: EstadisticasViewModel = viewModel(
-        factory = EstadisticasViewModel.Factory(repository)
+        factory = EstadisticasViewModel.Factory(app, repository)
     )
     val stats by viewModel.stats.collectAsStateWithLifecycle()
     val years by viewModel.yearsAvailable.collectAsStateWithLifecycle()
 
+    var showDayPicker by remember { mutableStateOf(false) }
     val filtros = viewModel.filtros
     var filtrosExpandidos by remember { mutableStateOf(false) }
     var añoExpanded by remember { mutableStateOf(false) }
@@ -54,19 +61,33 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Text(
-                text = "Estadísticas",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 20.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Estadísticas",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { showDayPicker = true }) {
+                    Icon(
+                        Icons.Default.CalendarMonth,
+                        contentDescription = "Días de descanso",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
         }
 
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Row(
@@ -80,12 +101,12 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
                             text = "Filtros: ${generarTextoFiltro(filtros, viewModel.semanaSeleccionada)}",
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp,
-                            color = TextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Icon(
                             imageVector = if (filtrosExpandidos) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                             contentDescription = null,
-                            tint = TextSecondary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -107,8 +128,8 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
                                             singleLine = true,
                                             textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
                                             colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = CyanPrimary, unfocusedBorderColor = CardDark,
-                                                focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedTextColor = MaterialTheme.colorScheme.onSurface, unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                                             )
                                         )
                                         ExposedDropdownMenu(
@@ -144,8 +165,8 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
                                             singleLine = true,
                                             textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
                                             colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = CyanPrimary, unfocusedBorderColor = CardDark,
-                                                focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary
+                                                focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedTextColor = MaterialTheme.colorScheme.onSurface, unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                                             )
                                         )
                                         ExposedDropdownMenu(
@@ -179,9 +200,9 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
                                             mostrarSemana = it
                                             if (!it) viewModel.setSemana(null)
                                         },
-                                        colors = CheckboxDefaults.colors(checkedColor = CyanPrimary)
+                                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
                                     )
-                                    Text("Filtrar por semana", fontSize = 13.sp, color = TextSecondary)
+                                    Text("Filtrar por semana", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 if (mostrarSemana) {
                                     Spacer(modifier = Modifier.height(4.dp))
@@ -237,7 +258,7 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = CardDark)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -246,9 +267,9 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
                         fontSize = 15.sp
                     )
                     if (stats.unidadGrafico == "h") {
-                        Text("Eje vertical: Horas", color = TextSecondary, fontSize = 11.sp)
+                        Text("Eje vertical: Horas", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                     } else {
-                        Text("Eje vertical: Minutos", color = TextSecondary, fontSize = 11.sp)
+                        Text("Eje vertical: Minutos", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     BarChart(data = stats.grafico, unidad = stats.unidadGrafico)
@@ -261,7 +282,7 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardDark)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
@@ -288,6 +309,10 @@ fun EstadisticasScreen(repository: WorkoutRepository) {
 
         item { Spacer(modifier = Modifier.height(80.dp)) }
     }
+
+    if (showDayPicker) {
+        RestDayPickerDialog(onDismiss = { showDayPicker = false })
+    }
 }
 
 @Composable
@@ -307,7 +332,7 @@ fun CalendarWeekPicker(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
@@ -321,7 +346,7 @@ fun CalendarWeekPicker(
                 val w = weeks[selectedIdx]
                 Text(
                     text = "Semana seleccionada: ${w.label}",
-                    color = CyanPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -333,7 +358,7 @@ fun CalendarWeekPicker(
                     Text(
                         text = dia,
                         fontSize = 10.sp,
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
                     )
@@ -348,7 +373,7 @@ fun CalendarWeekPicker(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
-                        .background(if (isSelected) CyanPrimary.copy(alpha = 0.2f) else androidx.compose.ui.graphics.Color.Transparent)
+                        .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else androidx.compose.ui.graphics.Color.Transparent)
                         .clickable {
                             selectedIdx = row
                             if (row in weeks.indices) onSelectWeek(weeks[row])
@@ -366,7 +391,7 @@ fun CalendarWeekPicker(
                                 Text(
                                     text = dia.toString(),
                                     fontSize = 12.sp,
-                                    color = if (isSelected) TextPrimary else TextSecondary,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
@@ -388,7 +413,7 @@ fun StatCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardDark)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -398,7 +423,7 @@ fun StatCard(
             Icon(
                 imageVector = icono,
                 contentDescription = null,
-                tint = CyanPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
             Column {
@@ -409,7 +434,7 @@ fun StatCard(
                 )
                 Text(
                     text = titulo,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp
                 )
             }
@@ -432,65 +457,15 @@ fun RachaCard(
     valor: String,
     titulo: String
 ) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val shimmerProgress by infiniteTransition.animateFloat(
-        initialValue = -0.5f,
-        targetValue = 1.5f,
-        animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = 4000
-                -0.5f at 0
-                1.5f at 800
-                1.5f at 4000
-            },
-            repeatMode = RepeatMode.Restart
-        )
-    )
+    val esCero = valor.toIntOrNull() == 0
 
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp))
-                .drawBehind {
-                    drawRect(
-                        brush = Brush.linearGradient(
-                            GoldGradientColors,
-                            start = Offset(0f, size.height),
-                            end = Offset(size.width, 0f)
-                        ),
-                        size = size
-                    )
-                }
+    if (esCero) {
+        Card(
+            modifier = modifier,
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                if (shimmerProgress in -0.4f..1.4f) {
-                    val t = (shimmerProgress + 0.5f).coerceIn(0f, 1f)
-                    val cx = t * size.width * 1.4f - size.width * 0.2f
-                    val cy = t * size.height * 1.4f - size.height * 0.2f
-                    val gradLen = maxOf(size.width, size.height) * 0.275f
-
-                    drawRect(
-                        brush = Brush.linearGradient(
-                            0.0f to Color.Transparent,
-                            0.3f to Color.Transparent,
-                            0.5f to Color.White.copy(alpha = 0.5f),
-                            0.7f to Color.White.copy(alpha = 0.15f),
-                            1.0f to Color.Transparent,
-                            start = Offset(cx - gradLen, cy - gradLen),
-                            end = Offset(cx + gradLen, cy + gradLen)
-                        ),
-                        size = size,
-                        blendMode = BlendMode.Screen
-                    )
-                }
-            }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -498,25 +473,114 @@ fun RachaCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    Icons.Default.Star,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
+                Text(
+                    text = "\uD83D\uDE22",
+                    fontSize = 36.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = valor,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
+                    fontSize = 36.sp,
                     color = Color.White
                 )
                 Text(
-                    text = titulo,
+                    text = titulo.uppercase(),
+                    fontWeight = FontWeight.Bold,
                     color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 13.sp,
+                    fontSize = 16.sp,
                     textAlign = TextAlign.Center
                 )
+            }
+        }
+    } else {
+        val infiniteTransition = rememberInfiniteTransition()
+        val shimmerProgress by infiniteTransition.animateFloat(
+            initialValue = -0.5f,
+            targetValue = 1.5f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 4000
+                    -0.5f at 0
+                    1.5f at 800
+                    1.5f at 4000
+                },
+                repeatMode = RepeatMode.Restart
+            )
+        )
+
+        Card(
+            modifier = modifier,
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(12.dp))
+                    .drawBehind {
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                GoldGradientColors,
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, 0f)
+                            ),
+                            size = size
+                        )
+                    }
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    if (shimmerProgress in -0.4f..1.4f) {
+                        val t = (shimmerProgress + 0.5f).coerceIn(0f, 1f)
+                        val cx = t * size.width * 1.4f - size.width * 0.2f
+                        val cy = t * size.height * 1.4f - size.height * 0.2f
+                        val gradLen = maxOf(size.width, size.height) * 0.275f
+
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                0.0f to Color.Transparent,
+                                0.3f to Color.Transparent,
+                                0.5f to Color.White.copy(alpha = 0.5f),
+                                0.7f to Color.White.copy(alpha = 0.15f),
+                                1.0f to Color.Transparent,
+                                start = Offset(cx - gradLen, cy - gradLen),
+                                end = Offset(cx + gradLen, cy + gradLen)
+                            ),
+                            size = size,
+                            blendMode = BlendMode.Screen
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = valor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 36.sp,
+                        color = Color.White
+                    )
+                    Text(
+                        text = titulo.uppercase(),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -526,46 +590,54 @@ fun RachaCard(
 fun BarChart(data: List<EstadisticasViewModel.BarraDato>, unidad: String) {
     val maxVal = data.maxOfOrNull { it.valor }?.takeIf { it > 0 } ?: 1
 
+    val scrollState = rememberScrollState()
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Bottom
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(scrollState)
         ) {
-            data.forEach { item ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    if (item.valor > 0) {
-                        Text(
-                            text = "${item.valor}",
-                            fontSize = 9.sp,
-                            color = CyanPrimary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                    }
-                    val fraccion = item.valor.toFloat() / maxVal
-                    Box(
-                        modifier = Modifier
-                            .width(if (data.size > 7) 16.dp else 24.dp)
-                            .height((fraccion * 80).dp.coerceAtLeast(4.dp))
-                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                            .background(
-                                if (item.valor > 0) CyanPrimary
-                                else CardDark.copy(alpha = 0.3f)
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                data.forEach { item ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom,
+                        modifier = Modifier.width(32.dp)
+                    ) {
+                        if (item.valor > 0) {
+                            Text(
+                                text = "${item.valor}",
+                                fontSize = 9.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
                             )
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = item.label,
-                        fontSize = if (data.size > 7) 8.sp else 10.sp,
-                        color = TextSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                            Spacer(modifier = Modifier.height(2.dp))
+                        }
+                        val fraccion = item.valor.toFloat() / maxVal
+                        Box(
+                            modifier = Modifier
+                                .width(24.dp)
+                                .height((fraccion * 80).dp.coerceAtLeast(4.dp))
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .background(
+                                    if (item.valor > 0) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = item.label,
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
@@ -600,13 +672,13 @@ fun EjercicioFrecuenteRow(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "$posicion",
-                    color = CyanPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp
                 )
                 Text(nombre, fontSize = 13.sp)
             }
-            Text("$veces veces", color = TextSecondary, fontSize = 12.sp)
+            Text("$veces veces", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
         Spacer(modifier = Modifier.height(4.dp))
         Box(
@@ -614,13 +686,13 @@ fun EjercicioFrecuenteRow(
                 .fillMaxWidth()
                 .height(4.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(SurfaceDark)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraccion)
                     .fillMaxHeight()
-                    .background(CyanPrimary)
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
     }

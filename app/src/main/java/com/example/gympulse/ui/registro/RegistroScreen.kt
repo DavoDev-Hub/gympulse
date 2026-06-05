@@ -2,9 +2,10 @@ package com.example.gympulse.ui.registro
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,14 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gympulse.data.ExerciseSetEntity
 import com.example.gympulse.data.WorkoutEntity
 import com.example.gympulse.data.WorkoutRepository
+import com.example.gympulse.ui.components.RestDayPickerDialog
 import com.example.gympulse.ui.estadisticas.getMonthName
-import com.example.gympulse.ui.theme.CardDark
-import com.example.gympulse.ui.theme.TextSecondary
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,6 +43,18 @@ fun RegistroScreen(
     val workoutsWithSets by viewModel.workoutsWithSets.collectAsStateWithLifecycle()
     val years by viewModel.yearsAvailable.collectAsStateWithLifecycle()
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    var showDayPicker by remember { mutableStateOf(false) }
     var añoExpanded by remember { mutableStateOf(false) }
     var mesExpanded by remember { mutableStateOf(false) }
     val filtros = viewModel.filtros
@@ -60,17 +74,31 @@ fun RegistroScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 20.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = titulo,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = { showDayPicker = true }) {
+                Icon(
+                    Icons.Default.CalendarMonth,
+                    contentDescription = "Días de descanso",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -90,8 +118,8 @@ fun RegistroScreen(
                             singleLine = true,
                             textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = CyanPrimary, unfocusedBorderColor = CardDark,
-                                focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary
+                                focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface, unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             )
                         )
                         ExposedDropdownMenu(
@@ -127,8 +155,8 @@ fun RegistroScreen(
                             singleLine = true,
                             textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = CyanPrimary, unfocusedBorderColor = CardDark,
-                                focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary
+                                focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface, unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             )
                         )
                         ExposedDropdownMenu(
@@ -161,22 +189,44 @@ fun RegistroScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Sin entrenamientos aún",
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 16.sp
                     )
                 }
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(workoutsWithSets) { item ->
+            LazyColumn {
+                itemsIndexed(workoutsWithSets) { index, item ->
+                    if (index > 0) {
+                        val prev = workoutsWithSets[index - 1]
+                        if (!mismoDia(item.workout.date, prev.workout.date)) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                HorizontalDivider(
+                                    modifier = Modifier.fillMaxWidth(0.9f),
+                                    thickness = 1.5.dp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                                )
+                            }
+                        }
+                    }
                     WorkoutCard(
                         workoutWithSets = item,
                         onDelete = { viewModel.deleteWorkout(item.workout) }
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
                 item { Spacer(modifier = Modifier.height(80.dp)) }
             }
         }
+    }
+
+    if (showDayPicker) {
+        RestDayPickerDialog(onDismiss = { showDayPicker = false })
     }
 }
 
@@ -218,7 +268,7 @@ fun WorkoutCard(
         ) {
             Text(
                 text = diaSemana(workout.date),
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -230,7 +280,7 @@ fun WorkoutCard(
             )
             Text(
                 text = mes(workout.date),
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp
             )
         }
@@ -240,7 +290,7 @@ fun WorkoutCard(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = CardDark)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
 
@@ -258,7 +308,7 @@ fun WorkoutCard(
                         if (duracion != null) {
                             Text(
                                 text = "$duracion min",
-                                color = TextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp
                             )
                         }
@@ -270,7 +320,7 @@ fun WorkoutCard(
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = "Eliminar",
-                                tint = TextSecondary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -282,7 +332,7 @@ fun WorkoutCard(
                 if (ejerciciosResumen.isEmpty()) {
                     Text(
                         text = "Sin ejercicios",
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 } else {
@@ -323,6 +373,12 @@ fun duracionMinutos(start: Long, end: Long?): Long? {
     return diff / 60000
 }
 
-private val SurfaceDark = com.example.gympulse.ui.theme.SurfaceDark
-private val CyanPrimary = com.example.gympulse.ui.theme.CyanPrimary
-private val TextPrimary = com.example.gympulse.ui.theme.TextPrimary
+private fun mismoDia(a: Long, b: Long): Boolean {
+    val cal = Calendar.getInstance()
+    cal.timeInMillis = a
+    val ya = cal.get(Calendar.YEAR); val ma = cal.get(Calendar.MONTH); val da = cal.get(Calendar.DAY_OF_MONTH)
+    cal.timeInMillis = b
+    return ya == cal.get(Calendar.YEAR) && ma == cal.get(Calendar.MONTH) && da == cal.get(Calendar.DAY_OF_MONTH)
+}
+
+

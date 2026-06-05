@@ -1,17 +1,23 @@
 package com.example.gympulse.ui.estadisticas
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.gympulse.data.PreferencesManager
 import com.example.gympulse.data.WorkoutRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-class EstadisticasViewModel(private val repository: WorkoutRepository) : ViewModel() {
+class EstadisticasViewModel(
+    application: Application,
+    private val repository: WorkoutRepository
+) : AndroidViewModel(application) {
+    private val prefs = PreferencesManager(application)
 
     data class EstadisticasUI(
         val totalWorkouts: Int = 0,
@@ -189,21 +195,57 @@ class EstadisticasViewModel(private val repository: WorkoutRepository) : ViewMod
 
     private fun calcularRacha(workouts: List<com.example.gympulse.data.WorkoutEntity>): Int {
         if (workouts.isEmpty()) return 0
+        val restDays = prefs.restDays
         val cal = Calendar.getInstance()
         val hoy = cal.get(Calendar.DAY_OF_YEAR)
+        val hoyAno = cal.get(Calendar.YEAR)
         val diasConWorkout = workouts.map { w ->
-            Calendar.getInstance().apply { timeInMillis = w.date }.get(Calendar.DAY_OF_YEAR)
+            val c = Calendar.getInstance().apply { timeInMillis = w.date }
+            c.get(Calendar.YEAR) * 1000 + c.get(Calendar.DAY_OF_YEAR)
         }.toSet()
+        fun diaId(ano: Int, dia: Int) = ano * 1000 + dia
+        fun diaSemana(ano: Int, diaDelAno: Int): Int {
+            cal.set(Calendar.YEAR, ano)
+            cal.set(Calendar.DAY_OF_YEAR, diaDelAno)
+            return cal.get(Calendar.DAY_OF_WEEK) // 1=Sunday, 2=Monday, ..., 7=Saturday
+        }
+
         var racha = 0
-        var dia = hoy
-        while (diasConWorkout.contains(dia)) { racha++; dia-- }
+        var diaActual = hoy
+        var anoActual = hoyAno
+
+        // Start from today if there's activity, otherwise yesterday
+        if (diaId(anoActual, diaActual) !in diasConWorkout) {
+            diaActual--
+            if (diaActual <= 0) { diaActual = 365; anoActual-- }
+        }
+
+        while (true) {
+            val id = diaId(anoActual, diaActual)
+            if (id in diasConWorkout) {
+                racha++
+            } else {
+                // Check if it's a rest day → skip without breaking
+                val dow = diaSemana(anoActual, diaActual)
+                val restIndex = if (dow == Calendar.SUNDAY) 7 else dow - 1
+                if (restIndex in restDays) {
+                    // skip this day, don't break streak
+                } else {
+                    break
+                }
+            }
+            diaActual--
+            if (diaActual <= 0) { diaActual = 365; anoActual-- }
+            // Safety: avoid infinite loop
+            if (racha > 2000) break
+        }
         return racha
     }
 
     private suspend fun ejerciciosFrecuentes(ws: List<com.example.gympulse.data.WorkoutEntity>): List<Pair<String, Int>> {
         val conteo = mutableMapOf<String, Int>()
         ws.forEach { workout ->
-            val sets = repository.getSetsForWorkout(workout.id).first()
+            val sets = repository.getSetsForWorkoutOnce(workout.id)
             sets.filter { it.completed }.forEach { set ->
                 conteo[set.exerciseName] = (conteo[set.exerciseName] ?: 0) + 1
             }
@@ -211,10 +253,13 @@ class EstadisticasViewModel(private val repository: WorkoutRepository) : ViewMod
         return conteo.entries.sortedByDescending { it.value }.map { it.key to it.value }
     }
 
-    class Factory(private val repository: WorkoutRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    class Factory(
+        private val application: Application,
+        private val repository: WorkoutRepository
+    ) : ViewModelProvider.Factory {
+        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
-            return EstadisticasViewModel(repository) as T
+            return EstadisticasViewModel(application, repository) as T
         }
     }
 }

@@ -88,16 +88,21 @@ class NuevoWorkoutViewModel(
                     bodyWeight = pesocorporal.toFloatOrNull()
                 )
             )
-            val entities = _sets.value.mapIndexed { index, set ->
-                ExerciseSetEntity(
-                    workoutId    = workoutId,
-                    exerciseId   = 0L,
-                    exerciseName = set.exerciseName,
-                    setNumber    = index + 1,
-                    reps         = set.reps.toIntOrNull(),
-                    weight       = set.weight.toFloatOrNull()
-                )
-            }
+            val entities = _sets.value
+                .groupBy { it.exerciseName }
+                .flatMap { (_, series) ->
+                    series.mapIndexed { index, set ->
+                        ExerciseSetEntity(
+                            workoutId    = workoutId,
+                            exerciseId   = 0L,
+                            exerciseName = set.exerciseName,
+                            setNumber    = index + 1,
+                            reps         = set.reps.toIntOrNull(),
+                            weight       = set.weight.toFloatOrNull(),
+                            completed    = true
+                        )
+                    }
+                }
             repository.insertSets(entities)
             onDone()
         }

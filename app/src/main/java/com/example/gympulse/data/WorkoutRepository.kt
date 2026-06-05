@@ -7,6 +7,9 @@ class WorkoutRepository(private val db: AppDatabase) {
     fun getAllWorkouts(): Flow<List<WorkoutEntity>> =
         db.workoutDao().getAll()
 
+    suspend fun getAllWorkoutsOnce(): List<WorkoutEntity> =
+        db.workoutDao().getAllOnce()
+
     suspend fun insertWorkout(workout: WorkoutEntity): Long =
         db.workoutDao().insert(workout)
 
@@ -23,6 +26,9 @@ class WorkoutRepository(private val db: AppDatabase) {
     // --- Series ---
     fun getSetsForWorkout(workoutId: Long): Flow<List<ExerciseSetEntity>> =
         db.exerciseSetDao().getSetsForWorkout(workoutId)
+
+    suspend fun getSetsForWorkoutOnce(workoutId: Long): List<ExerciseSetEntity> =
+        db.exerciseSetDao().getSetsForWorkoutOnce(workoutId)
 
     suspend fun insertSet(set: ExerciseSetEntity) =
         db.exerciseSetDao().insert(set)
